@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
-import axios from "axios"
 import Home from "../Home/Home"
 import Signup from "../Signup/Signup"
 import Login from "../Login/Login"
@@ -9,6 +8,7 @@ import NotFound from "../NotFound/NotFound"
 import ShoppingCart from "../ShoppingCart/ShoppingCart"
 import { removeFromCart, addToCart, getQuantityOfItemInCart, getTotalItemsInCart } from "../../utils/cart"
 import "./App.css"
+import ApiClient from '../../services/apiClient'
 
 export default function App() {
   const [activeCategory, setActiveCategory] = useState("All Categories")
@@ -33,46 +33,47 @@ export default function App() {
   const handleOnCheckout = async () => {
     setIsCheckingOut(true)
 
-    try {
-      const res = await axios.post("http://localhost:3001/orders", { order: cart })
-      if (res?.data?.order) {
-        setOrders((o) => [...res.data.order, ...o])
+    const {data, error} = await ApiClient.postOrders(cart)
+    console.log(data, error)
+      if(data?.order){
+        setOrders((o) => [...data.order, ...o])
         setIsCheckingOut(false)
         setCart({})
-        return res.data.order
-      } else {
-        setError("Error checking out.")
+        return data.order
       }
-    } catch (err) {
-      console.log(err)
-      const message = err?.response?.data?.error?.message
-      setError(message ?? String(err))
-    } finally {
+      if(error){
+        setError(error)
+      }
       setIsCheckingOut(false)
     }
-  }
 
   useEffect(() => {
     const fetchProducts = async () => {
       setIsFetching(true)
 
-      try {
-        const res = await axios.get("http://localhost:3001/store")
-        if (res?.data?.products) {
-          setProducts(res.data.products)
-        } else {
-          setError("Error fetching products.")
-        }
-      } catch (err) {
-        console.log(err)
-        const message = err?.response?.data?.error?.message
-        setError(message ?? String(err))
-      } finally {
+      const {data, error} = await ApiClient.fetchProducts()
+      if(data?.products){
+        setProducts(data.products)
+      }
+      if(error){
+        setError(error)
+      }
         setIsFetching(false)
+    }
+
+    const fetchAuthedUser = async () => {
+      const token = localStorage.getItem("student_token")
+
+      if(token){
+        ApiClient.setToken(token)
+        const realUser = await  ApiClient.me()
+        setUser(realUser.data.user)
       }
     }
 
+    fetchAuthedUser()
     fetchProducts()
+    
   }, [])
 
   return (
@@ -94,6 +95,7 @@ export default function App() {
                 addToCart={handleOnAddToCart}
                 removeFromCart={handleOnRemoveFromCart}
                 getQuantityOfItemInCart={handleGetItemQuantity}
+                setUser = {setUser}
               />
             }
           />

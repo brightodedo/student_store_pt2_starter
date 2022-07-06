@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import person from "../../assets/person.svg"
 import "./SubNavbar.css"
+import ApiClient from '../../services/apiClient'
 
 export default function SubNavbar({
   user,
@@ -9,11 +10,18 @@ export default function SubNavbar({
   setActiveCategory,
   handleOnSearchInputChange,
   searchInputValue,
+  setUser,
 }) {
   const [open, setOpen] = useState(true)
 
   const toggleOpen = () => setOpen((isOpen) => setOpen(!isOpen))
 
+  const handleOnClick = (event) => {
+    event.preventDefault();
+    
+    ApiClient.logoutUser()
+    setUser(null)
+  }
   return (
     <nav className="SubNavbar">
       <div className="content">
@@ -37,10 +45,16 @@ export default function SubNavbar({
 
             <div className="auth">
               {user?.email ? (
+                <div>
                 <Link to="/orders">
                   <img src={person} alt="avatar" />
                   {user.email}
                 </Link>
+                <div className="dog" onClick={handleOnClick}>
+                  Logout
+                  <i className="material-icons">send</i>
+              </div>
+              </div>
               ) : (
                 <Link to="/login">
                   <img src={person} alt="avatar" />

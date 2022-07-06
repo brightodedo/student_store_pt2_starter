@@ -131,3 +131,29 @@
 .SubNavbar .category-menu li button:active {
   transform: translateY(1px);
 }
+
+.dog a {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-weight: 500;
+  color: var(--pure-white);
+  margin: 0 5px;
+}
+
+.dog i{
+  color: var(--pure-white);
+  margin: 0 5px;
+}
+
+.dog {
+    color: var(--pure-white);
+    background: var(--bright-green);
+    width: 170px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 20px;
+    cursor: pointer;
+  }
